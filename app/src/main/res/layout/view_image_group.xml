@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/imageGroupView_height"
+    android:background="#eee"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/iv_num1"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/imageGroupView_paddingSize"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:contentDescription="@string/desc_image_view"/>
+    <ImageView
+        android:id="@+id/iv_num2"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/imageGroupView_paddingSize"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:contentDescription="@string/desc_image_view"/>
+    <ImageView
+        android:id="@+id/iv_num3"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/imageGroupView_paddingSize"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:contentDescription="@string/desc_image_view"/>
+    <ImageView
+        android:id="@+id/iv_num4"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/imageGroupView_paddingSize"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:contentDescription="@string/desc_image_view"/>
+    <ImageView
+        android:id="@+id/iv_num5"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/imageGroupView_paddingSize"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:contentDescription="@string/desc_image_view"/>
+
+</LinearLayout>
