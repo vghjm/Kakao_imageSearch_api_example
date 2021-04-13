@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         // collection category 선택을 위한 radio group 등록 및 설정
         findViewById<RadioGroup>(R.id.rg_category).apply{
             categoryRG = this
-            updateCategory(emptyList())
+            updateCategory(imageSelector.getCollectionList())
 
             this.setOnCheckedChangeListener{ radioGroup: RadioGroup, checkedId: Int ->
                 radioGroup.findViewById<RadioButton>(checkedId).text.toString().also{
@@ -128,12 +128,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     fun updateCategory(collectionList: List<String>){
         categoryRG.removeAllViews()
-
-        // 전체 선택 버튼 등록
-        val defaultRadioButton = RadioButton(this)
-        defaultRadioButton.text = ImageSelector.SELECT_ALL
-        categoryRG.addView(defaultRadioButton)
-        if(ImageSelector.SELECT_ALL == checkedCollection) defaultRadioButton.isChecked = true
 
         // 나머지 콜렉션 버튼 등록
         for(collection in collectionList){

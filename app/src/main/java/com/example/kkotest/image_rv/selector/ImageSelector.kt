@@ -4,16 +4,16 @@ import android.util.Log
 import com.example.kkotest.image_rv.data.ImageData
 
 class ImageSelector {
-    val allImageDataList = mutableListOf<ImageData>()
-    val imageDataWithCollection = HashMap<String, MutableList<ImageData>>()
-    var lastAppendedIndex = 0
-    val lastAppendedIndexWithCollection = HashMap<String, Int>()
     companion object {
         val SELECT_ALL = "all"
     }
 
+    val imageDataWithCollection = hashMapOf(SELECT_ALL to mutableListOf<ImageData>())
+    val lastAppendedIndexWithCollection = hashMapOf(SELECT_ALL to 0)
+
     fun appendImageList(imageDataList: List<ImageData>){
-        this.allImageDataList.addAll(imageDataList)
+        imageDataWithCollection[SELECT_ALL]!!.addAll(imageDataList)
+        lastAppendedIndexWithCollection[SELECT_ALL] = 0
 
         for(imageData in imageDataList){
             val collection = imageData.collection
@@ -26,14 +26,15 @@ class ImageSelector {
             }
         }
 
-        Log.d("결과", "이미지 추가됨 allImageDataList.size = ${allImageDataList.size}")
+        Log.d("결과", "이미지 추가됨 imageDataWithCollection[SELECT_ALL].size = ${imageDataWithCollection[SELECT_ALL]!!.size}")
     }
 
     fun resetImageDataList(){
-        this.allImageDataList.clear()
         this.imageDataWithCollection.clear()
-        this.lastAppendedIndex = 0
         this.lastAppendedIndexWithCollection.clear()
+
+        imageDataWithCollection[SELECT_ALL] = mutableListOf()
+        lastAppendedIndexWithCollection[SELECT_ALL] = 0
     }
 
     fun getCollectionList(): List<String> {
@@ -41,33 +42,22 @@ class ImageSelector {
     }
 
     fun selectAll(selectedCollection: String): List<ImageData>{
-        if(selectedCollection == SELECT_ALL){
-            lastAppendedIndex = allImageDataList.size
+        indexUpdate(selectedCollection)
 
-            return allImageDataList
-        }else{
-            lastAppendedIndexWithCollection[selectedCollection] = imageDataWithCollection[selectedCollection]!!.size
-
-            return imageDataWithCollection[selectedCollection]!!
-        }
+        return imageDataWithCollection[selectedCollection]!!
     }
 
     fun selectLastAppended(selectedCollection: String): List<ImageData>{
-        val selectedList: MutableList<ImageData>
-        val startIndex: Int
-
-        if(selectedCollection == SELECT_ALL){
-            startIndex = lastAppendedIndex
-            selectedList = allImageDataList
-            lastAppendedIndex = allImageDataList.size
-        }else{
-            startIndex = lastAppendedIndexWithCollection[selectedCollection]!!
-            selectedList = imageDataWithCollection[selectedCollection]!!
-            lastAppendedIndexWithCollection[selectedCollection] = imageDataWithCollection[selectedCollection]!!.size
-        }
+        val selectedList = imageDataWithCollection[selectedCollection]!!
+        val startIndex = lastAppendedIndexWithCollection[selectedCollection]!!
+        indexUpdate(selectedCollection)
 
         return List(selectedList.size - startIndex){
             selectedList[startIndex + it]
         }
+    }
+
+    private fun indexUpdate(selectedCollection: String){
+        lastAppendedIndexWithCollection[selectedCollection] = imageDataWithCollection[selectedCollection]!!.size
     }
 }

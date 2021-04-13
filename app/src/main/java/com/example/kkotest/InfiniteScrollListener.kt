@@ -21,7 +21,7 @@ class InfiniteScrollListener(
         super.onScrolled(recyclerView, dx, dy)
 
         // 아래로 스크롤한 경우
-        if(dy > 0){
+        if(dy >= 0){
             visibleItemCount = recyclerView.childCount
             totalItemCount = layoutManager.itemCount
             firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
@@ -32,9 +32,7 @@ class InfiniteScrollListener(
                 Log.d("결과", "Scroll end reached!")
 
                 loading = true
-                if(!loadMoreData()){
-                    Toast.makeText(recyclerView.context, "더이상 결과가 없습니다.", Toast.LENGTH_SHORT).show()
-                }
+                loadMoreData()
             }
         }
     }
