@@ -1,6 +1,6 @@
-package com.example.kkotest.kakao.api.search.image.service
+package com.example.kkotest.kakao_api.search_image.detail
 
-import com.example.kkotest.kakao.api.search.image.data.SearchImageResponse
+import com.example.kkotest.kakao_api.search_image.SearchImageResponseData
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -9,5 +9,5 @@ interface SearchImageService {
     fun getSearchResult(
         @QueryMap(encoded = true) parameter: Map<String, String>,
         @Header("Authorization") key: String
-    ): Call<SearchImageResponse>
+    ): Call<SearchImageResponseData>
 }

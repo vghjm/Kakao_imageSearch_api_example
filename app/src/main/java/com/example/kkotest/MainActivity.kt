@@ -10,70 +10,105 @@ import android.util.Log
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.kkotest.image_group_view.adaptor.ImageGroupAdaptor
-import com.example.kkotest.image_group_view.data.Image
-import com.example.kkotest.image_group_view.repository.ImageGroupViewRepository
-import com.example.kkotest.kakao.api.search.image.repository.SearchImageRepository
+import com.example.kkotest.image_rv.adapter.ImageViewAdapter
+import com.example.kkotest.image_rv.data.ImageData
+import com.example.kkotest.image_rv.selector.ImageSelector
+import com.example.kkotest.kakao_api.search_image.SearchImageController
 
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class MainActivity : AppCompatActivity() {
-    private lateinit var rvImageView: RecyclerView
-    private lateinit var rgCategory: RadioGroup
-    private lateinit var imageViewAdaptor: ImageGroupAdaptor
+    private lateinit var searchImageRV: RecyclerView
+    private lateinit var categoryRG: RadioGroup
+    private var paddingSize = 0
+    private lateinit var imageViewAdaptor: ImageViewAdapter
+    private lateinit var gridLayoutManager: GridLayoutManager
+    private lateinit var infiniteScrollListener: InfiniteScrollListener
     private lateinit var searchTextView: TextView
-    private lateinit var imageGroupViewRepository: ImageGroupViewRepository
-    private var checkedCollection: String = ImageGroupViewRepository.SELECT_ALL
+    private val imageSelector = ImageSelector()
+    private var checkedCollection: String = ImageSelector.SELECT_ALL
+    private val searchImageController = SearchImageController()
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        paddingSize = this.resources.getDimension(R.dimen.imageView_paddingSize).toInt()
+        imageViewAdaptor = ImageViewAdapter(mutableListOf(), (getDeviceWidth() - paddingSize) / 2)
+
         // 검색결과 이미지를 보여주는 recycler view 등록 및 설정
-        rvImageView = findViewById(R.id.rv_image_view)
-        imageViewAdaptor = ImageGroupAdaptor(emptyList())
-        rvImageView.adapter = imageViewAdaptor
-        rvImageView.layoutManager = LinearLayoutManager(this)
+        findViewById<RecyclerView>(R.id.rv_image_view).apply {
+            searchImageRV = this
+            gridLayoutManager = GridLayoutManager(this.context, 2)
+            infiniteScrollListener = InfiniteScrollListener({ searchImageController.loadAdditionalData() }, gridLayoutManager)
+
+            this.adapter = imageViewAdaptor
+            this.layoutManager = gridLayoutManager
+            this.addOnScrollListener(infiniteScrollListener)
+        }
 
         // collection category 선택을 위한 radio group 등록 및 설정
-        rgCategory = findViewById(R.id.rg_category)
-        updateCategory(emptyList())
-        rgCategory.setOnCheckedChangeListener{ radioGroup: RadioGroup, checkedId: Int ->
-            checkedCollection = radioGroup.findViewById<RadioButton>(checkedId).text.toString()
+        findViewById<RadioGroup>(R.id.rg_category).apply{
+            categoryRG = this
+            updateCategory(emptyList())
 
-            imageViewAdaptor.replaceImageGroupList(imageGroupViewRepository.makeImageGroup(checkedCollection))
+            this.setOnCheckedChangeListener{ radioGroup: RadioGroup, checkedId: Int ->
+                radioGroup.findViewById<RadioButton>(checkedId).text.toString().also{
+                    if(it != checkedCollection){
+                        checkedCollection = it
+                        searchImageRV.scrollToPosition(0)
+
+                        imageSelector.selectAll(checkedCollection).apply {
+                            imageViewAdaptor.replaceImageDataList(this)
+
+                            if(this.size < 5){
+                                searchImageController.loadAdditionalData()
+                            }
+                        }
+                    }else{
+                        imageSelector.selectLastAppended(checkedCollection).apply {
+                            imageViewAdaptor.appendImageDataList(this)
+
+                            if(this.size < 5){
+                                searchImageController.loadAdditionalData()
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // 검색 입력창 등록
         searchTextView = findViewById<EditText>(R.id.et_keyword)
 
-        // 이미지를 그룹별로 모아서 보여주는 ImageGroupView 등록 및 설정
-        imageGroupViewRepository = ImageGroupViewRepository(
-                applicationContext.resources.getDimension(R.dimen.imageGroupView_height).toInt(),
-                getDeviceWidth(),
-                applicationContext.resources.getDimension(R.dimen.imageGroupView_paddingSize).toInt()
-        )
-
         // 검색 버튼 등록
         findViewById<Button>(R.id.btn_search).setOnClickListener{
             val query = searchTextView.text.toString()
+            if(query == ""){
+                Toast.makeText(this, "검색어를 입력해주세요?", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            Log.d("결과", " 검색어 정상 입력됨 : ${query}")
 
-            if(query == "") SearchImageRepository.setSearchImageRequest(null, SearchImageRepository.SORT_ACCURACY)
-            else SearchImageRepository.setSearchImageRequest(query, SearchImageRepository.SORT_ACCURACY)
-
-            SearchImageRepository.getSearchImageResult()
+            searchImageController.setSearchImageRequest(query)
+            imageSelector.resetImageDataList()
+            searchImageController.search()
+            imageViewAdaptor.resetImageDataList()
         }
 
-        // 서버에서 검색결과를 받아오면 뷰어에 데이터 연결
-        SearchImageRepository.getSearchImageResult().observe(this, { searchImage ->
-            val documents = searchImage.documents
-            Log.d("결과", "관찰결과 ->  ${searchImage.meta}")
-            val imageList = List(documents.size){
+        // 서버에서 검색결과를 받아오면 imageSelector에 데이터 연결 & 카테고리 갱신
+        searchImageController.getSearchImageResult().observe(this, { result ->
+            Log.d("결과", "관찰결과 ->  ${result.meta}")
+            infiniteScrollListener.loadingFinish()
+
+            val documents = result.documents
+            val imageList = List(result.documents.size){
                 val imageInfo = documents[it]
 
-                Image(imageInfo.collection,
+                ImageData(imageInfo.collection,
                         imageInfo.datetime,
                         imageInfo.display_sitename,
                         imageInfo.doc_url,
@@ -84,28 +119,29 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-            imageGroupViewRepository.updateImageList(imageList)
-            imageViewAdaptor.replaceImageGroupList(imageGroupViewRepository.makeImageGroup(checkedCollection))
-            rvImageView.smoothScrollToPosition(0)
-            updateCategory(imageGroupViewRepository.getCollectionList())
+            imageSelector.appendImageList(imageList)
+            updateCategory(imageSelector.getCollectionList())
         })
+
     }
 
     @SuppressLint("SetTextI18n")
-    fun updateCategory(categoryList: List<String>){
-        rgCategory.removeAllViews()
+    fun updateCategory(collectionList: List<String>){
+        categoryRG.removeAllViews()
 
+        // 전체 선택 버튼 등록
         val defaultRadioButton = RadioButton(this)
-        defaultRadioButton.text = ImageGroupViewRepository.SELECT_ALL
-        rgCategory.addView(defaultRadioButton)
+        defaultRadioButton.text = ImageSelector.SELECT_ALL
+        categoryRG.addView(defaultRadioButton)
+        if(ImageSelector.SELECT_ALL == checkedCollection) defaultRadioButton.isChecked = true
 
-        for(category in categoryList){
+        // 나머지 콜렉션 버튼 등록
+        for(collection in collectionList){
             val radioButton = RadioButton(this)
-            radioButton.text = category
-            rgCategory.addView(radioButton)
+            radioButton.text = collection
+            categoryRG.addView(radioButton)
+            if(collection == checkedCollection) radioButton.isChecked = true
         }
-
-        defaultRadioButton.isChecked = true
     }
 
     private fun getDeviceWidth(): Int {
@@ -120,15 +156,15 @@ class MainActivity : AppCompatActivity() {
 
         if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             findViewById<ConstraintLayout>(R.id.constraintLayout_nav).layoutParams.height = applicationContext.resources.getDimension(R.dimen.dp_120).toInt()
-            imageGroupViewRepository.updateLayoutWidth(getDeviceWidth())
+            gridLayoutManager.spanCount = 2
+            imageViewAdaptor.updateImageWidth((getDeviceWidth() - paddingSize) / 2)
         }
 
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
             findViewById<ConstraintLayout>(R.id.constraintLayout_nav).layoutParams.height = applicationContext.resources.getDimension(R.dimen.dp_90).toInt()
-            imageGroupViewRepository.updateLayoutWidth(getDeviceWidth())
+            gridLayoutManager.spanCount = 4
+            imageViewAdaptor.updateImageWidth((getDeviceWidth() - paddingSize) / 4)
         }
-
-        imageViewAdaptor.replaceImageGroupList(imageGroupViewRepository.makeImageGroup(checkedCollection))
     }
 }
 

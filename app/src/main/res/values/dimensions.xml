@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="imageGroupView_height">120dp</dimen>
-    <dimen name="imageGroupView_paddingSize">1dp</dimen>
+    <dimen name="imageView_paddingSize">1dp</dimen>
     <dimen name="dp_120">120dp</dimen>
     <dimen name="dp_90">90dp</dimen>
 </resources>

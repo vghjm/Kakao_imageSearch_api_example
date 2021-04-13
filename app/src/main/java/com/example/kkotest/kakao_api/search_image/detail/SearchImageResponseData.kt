@@ -1,9 +1,13 @@
-package com.example.kkotest.kakao.api.search.image.data
+package com.example.kkotest.kakao_api.search_image
 
-data class SearchImageResponse(
-        val meta: Meta,
-        val documents: MutableList<ImageInfo>
-)
+data class SearchImageResponseData(
+        var meta: Meta = DEFAULT_META,
+        val documents: MutableList<ImageInfo> = mutableListOf()
+){
+    companion object{
+        val DEFAULT_META = Meta(true, 0, 0)
+    }
+}
 
 data class Meta(
         var is_end: Boolean,
