@@ -9,13 +9,13 @@ import com.example.kkotest.R
 import com.example.kkotest.image_rv.data.ImageData
 import com.squareup.picasso.Picasso
 
-class ImageViewAdapter(private val imageDataList: MutableList<ImageData>,
-                       private var imageWidth: Int): RecyclerView.Adapter<ImageViewAdapter.Holder>() {
+class ImageViewAdapter(private val imageDataList: MutableList<ImageData>, private var imageWidth: Int): RecyclerView.Adapter<ImageViewAdapter.Holder>() {
     class Holder(itemView: View): RecyclerView.ViewHolder(itemView) {
         fun bind(imageData: ImageData, imageWidth: Int) {
             itemView.findViewById<ImageView>(R.id.iv_image).apply {
                 this.layoutParams.width = imageWidth
                 this.layoutParams.height = imageWidth
+
                 Picasso.get().load(imageData.thumbnail_url)
                         .into(this)
             }
@@ -47,8 +47,9 @@ class ImageViewAdapter(private val imageDataList: MutableList<ImageData>,
         notifyDataSetChanged()
     }
 
-    fun updateImageWidth(imageWidth: Int){
+    fun replaceImageWidth(imageWidth: Int){
         this.imageWidth = imageWidth
+        notifyDataSetChanged()
     }
 
     fun resetImageDataList(){

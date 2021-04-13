@@ -6,6 +6,7 @@
     android:background="#ddd">
     <ImageView
         android:id="@+id/iv_image"
+        android:scaleType="fitCenter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

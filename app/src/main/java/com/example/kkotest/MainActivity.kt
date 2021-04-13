@@ -157,13 +157,13 @@ class MainActivity : AppCompatActivity() {
         if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             findViewById<ConstraintLayout>(R.id.constraintLayout_nav).layoutParams.height = applicationContext.resources.getDimension(R.dimen.dp_120).toInt()
             gridLayoutManager.spanCount = 2
-            imageViewAdaptor.updateImageWidth((getDeviceWidth() - paddingSize) / 2)
+            imageViewAdaptor.replaceImageWidth((getDeviceWidth() - paddingSize) / 2)
         }
 
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
             findViewById<ConstraintLayout>(R.id.constraintLayout_nav).layoutParams.height = applicationContext.resources.getDimension(R.dimen.dp_90).toInt()
             gridLayoutManager.spanCount = 4
-            imageViewAdaptor.updateImageWidth((getDeviceWidth() - paddingSize) / 4)
+            imageViewAdaptor.replaceImageWidth((getDeviceWidth() - paddingSize) / 4)
         }
     }
 }
