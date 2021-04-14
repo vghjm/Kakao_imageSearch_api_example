@@ -1,4 +1,4 @@
-package com.example.kkotest.kakao_api.search_image.detail
+package com.example.kkotest.kakao_api.search_image.service
 
 import com.example.kkotest.kakao_api.search_image.SearchImageResponseData
 import retrofit2.Call

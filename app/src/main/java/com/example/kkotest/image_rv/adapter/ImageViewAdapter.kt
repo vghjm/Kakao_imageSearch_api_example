@@ -9,12 +9,12 @@ import com.example.kkotest.R
 import com.example.kkotest.image_rv.data.ImageData
 import com.squareup.picasso.Picasso
 
-class ImageViewAdapter(private val imageDataList: MutableList<ImageData>, private var imageWidth: Int): RecyclerView.Adapter<ImageViewAdapter.Holder>() {
+class ImageViewAdapter(private val imageDataList: MutableList<ImageData>, private var layoutWidth: Int): RecyclerView.Adapter<ImageViewAdapter.Holder>() {
     class Holder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        fun bind(imageData: ImageData, imageWidth: Int) {
+        fun bind(imageData: ImageData, layoutWidth: Int) {
             itemView.findViewById<ImageView>(R.id.iv_image).apply {
-                this.layoutParams.width = imageWidth
-                this.layoutParams.height = imageWidth
+                this.layoutParams.width = layoutWidth
+                this.layoutParams.height = layoutWidth
 
                 Picasso.get().load(imageData.thumbnail_url)
                         .into(this)
@@ -29,7 +29,7 @@ class ImageViewAdapter(private val imageDataList: MutableList<ImageData>, privat
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.bind(imageDataList[position], imageWidth)
+        holder.bind(imageDataList[position], layoutWidth)
     }
 
     override fun getItemCount(): Int {
@@ -43,12 +43,13 @@ class ImageViewAdapter(private val imageDataList: MutableList<ImageData>, privat
     }
 
     fun appendImageDataList(imageDataList: List<ImageData>){
+        val start = this.imageDataList.size
         this.imageDataList.addAll(imageDataList)
-        notifyDataSetChanged()
+        notifyItemRangeChanged(start, imageDataList.size)
     }
 
-    fun replaceImageWidth(imageWidth: Int){
-        this.imageWidth = imageWidth
+    fun replaceLayoutWidth(layoutWidth: Int){
+        this.layoutWidth = layoutWidth
         notifyDataSetChanged()
     }
 

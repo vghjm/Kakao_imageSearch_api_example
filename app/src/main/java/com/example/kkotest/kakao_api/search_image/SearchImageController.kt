@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.kkotest.kakao_api.KakaoApi
 import com.example.kkotest.kakao_api.search_image.detail.SearchImageRequestData
-import com.example.kkotest.kakao_api.search_image.detail.SearchImageRetrofitClient
+import com.example.kkotest.kakao_api.search_image.client.SearchImageRetrofitClient
 import com.example.kkotest.kakao_api.search_image.detail.SortType
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,7 +14,6 @@ class SearchImageController {
     private val API_KEY = "KakaoAK {}".replace("{}", KakaoApi.API_KEY)
     private val result = MutableLiveData<SearchImageResponseData>()
     private val requestData = SearchImageRequestData()
-    private val responseData = SearchImageResponseData()
     private var isConnecting = false
     private var hasNextData = false
 
@@ -65,7 +64,6 @@ class SearchImageController {
         requestData.page = requestData.page + 1
 
         attemptConnection{ call: Call<SearchImageResponseData>, response: Response<SearchImageResponseData> ->
-            Log.d("결과:", " 데이터 가져옴 ${response.body()!!.meta} , 데이터예시 ${response.body()!!.documents[0]}")
             result.value = response.body() as SearchImageResponseData
             hasNextData = !result.value!!.meta.is_end
         }
@@ -75,10 +73,8 @@ class SearchImageController {
 
     fun search(): Boolean{
         if(requestData.query == null || isConnecting) return false
-        Log.d("결과", "검색 시작")
 
         attemptConnection{ call: Call<SearchImageResponseData>, response: Response<SearchImageResponseData> ->
-            Log.d("결과:", " 데이터 가져옴 ${response.body()!!.meta} , 데이터예시 ${response.body()!!.documents[0]}")
             result.value = response.body() as SearchImageResponseData
             hasNextData = !result.value!!.meta.is_end
         }

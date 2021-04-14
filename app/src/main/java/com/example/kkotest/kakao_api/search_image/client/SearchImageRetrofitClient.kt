@@ -1,6 +1,7 @@
-package com.example.kkotest.kakao_api.search_image.detail
+package com.example.kkotest.kakao_api.search_image.client
 
 import com.example.kkotest.kakao_api.KakaoApi
+import com.example.kkotest.kakao_api.search_image.service.SearchImageService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
